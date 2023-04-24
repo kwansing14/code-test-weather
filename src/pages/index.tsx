@@ -6,7 +6,7 @@ import Records from '@/components/Records';
 import SearchBar from '@/components/SearchBar';
 import Body from '@/components/Body';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-
+import ThemeButton from '@/components/ThemeButton';
 const notoSans = Noto_Sans({
   weight: ['400', '700'],
   subsets: ['latin'],
@@ -59,17 +59,18 @@ export interface WeatherDataProp {
 }
 
 export default function Home() {
+  const [animationParent] = useAutoAnimate();
   const [weatherData, setWeatherData] = useState<WeatherDataProp>();
   const [records, setRecords] = useState<WeatherDataProp[]>([]);
-
-  const [animationParent] = useAutoAnimate();
   // api mutation
   const mutation = useMutation({
     mutationFn: (country: string) => fetch(`/api/getWeather/${country}`),
     onSuccess: async (data) => {
       const res = await data.json();
       setWeatherData(res);
-      setRecords((prev) => [...prev, res]);
+      const newRecords = records;
+      newRecords.unshift(res);
+      setRecords(newRecords);
     },
   });
 
@@ -89,20 +90,21 @@ export default function Home() {
   }, []);
 
   return (
-    <main className='min-h-screen bg-[url("/assets/bg-light.png")] text-black'>
+    <main className='min-h-screen bg-[url("/assets/bg-light.png")] dark:bg-[url("/assets/bg-dark.png")] text-black dark:text-white'>
       <div
         className={
           'px-[15px] mx-auto w-full md:max-w-[700px]' + ` ${notoSans.className}`
         }
       >
         <div className='flex flex-col'>
+          <ThemeButton />
           <SearchBar mutation={mutation} />
-          <div className='mt-[112px] mb-[80px] bg-[rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.5)] rounded-[40px] relative'>
+          <div className='mt-[112px] mb-[80px] bg-[rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.5)] dark:bg-[rgba(0,0,0,0.2)] dark:border-[rgba(0,0,0,0.5)] rounded-[40px] relative'>
             <div
               className='flex flex-col px-[20px] md:px-[50px] py-[20px] md:py-[46px]'
               ref={animationParent}
             >
-              {weatherData && <Body weatherData={weatherData} />}
+              <Body weatherData={weatherData} />
               <Records
                 weatherData={weatherData}
                 records={records}

@@ -29,15 +29,15 @@ const Records: React.FC<RecordsProp> = ({
   };
 
   return (
-    <div className='w-full rounded-[24px] bg-[rgba(255,255,255,0.2)] px-[17px] md:px-[26px] py-[23px] mt-[26px]'>
+    <div className='w-full rounded-[24px] bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.2)] px-[17px] md:px-[26px] py-[23px] mt-[20px] md:mt-[26px]'>
       <div>Search History</div>
       <div className='flex flex-col mt-[26px] gap-[18px]' ref={animationParent}>
         {records.map((record: WeatherDataProp, i: number) => (
           <div
             key={i}
-            className='flex justify-between items-center bg-[rgba(255,255,255,0.4)] p-[10px] md:p-[21px] pr-[15px] rounded-[16px]'
+            className='flex justify-between items-center bg-[rgba(255,255,255,0.4)] dark:bg-[rgba(0,0,0,0.4)] p-[10px] md:p-[21px] pr-[15px] rounded-[16px]'
           >
-            <div className='flex flex-col md:flex-row justify-between w-full pr-2'>
+            <div className='flex flex-col md:flex-row justify-between w-full pr-2 text-[14px] md:text-base'>
               <div>
                 {record.name}, {record.sys.country}
               </div>
@@ -47,13 +47,13 @@ const Records: React.FC<RecordsProp> = ({
             </div>
             <div className='flex gap-2'>
               <div
-                className='h-[34px] w-[34px] rounded-full flex justify-center items-center bg-white cursor-pointer'
+                className='h-[34px] w-[34px] rounded-full flex justify-center items-center bg-white dark:bg-[rgba(0,0,0,0)] border cursor-pointer'
                 onClick={() => searchHandler(i)}
               >
                 <MdSearch />
               </div>
               <div
-                className='h-[34px] w-[34px] rounded-full flex justify-center items-center  bg-white cursor-pointer'
+                className='h-[34px] w-[34px] rounded-full flex justify-center items-center  bg-white dark:bg-[rgba(0,0,0,0)] border cursor-pointer'
                 onClick={() => deleteHandler(i)}
               >
                 <MdDelete />
