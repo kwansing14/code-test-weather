@@ -26,12 +26,20 @@ const SearchBar: React.FC<Prop> = ({ mutation }) => {
         <span className='absolute top-[6px] left-[11px] md:left-[22px] opacity-40 text-[8px] md:text-[10px] leading-[13.62px]'>
           Country
         </span>
-        <div
+        <button
           className='h-[40px] md:h-[60px] w-[40px] md:w-[60px] rounded-[8px] md:rounded-[20px] bg-[#6C40B5] dark:bg-[#28124D] flex justify-center items-center text-white'
           onClick={searchHandler}
+          disabled={mutation.isLoading}
         >
-          <MdSearch className='text-[25px] md:text-[32px]' />
-        </div>
+          {!mutation.isLoading && (
+            <MdSearch className='text-[25px] md:text-[32px]' />
+          )}
+          {mutation.isLoading && (
+            <div className='w-full h-full bg-[rgba(0,0,0,0.2)] rounded-[8px] md:rounded-[20px] flex justify-center items-center'>
+              <div className='animate-spin rounded-full h-[20px] w-[20px] border-t-2 border-b-2 border-white'></div>
+            </div>
+          )}
+        </button>
       </div>
       {mutation.isError && (
         <div className='text-sm bg-red-200 rounded-lg py-2 px-[11px] md:px-[22px] mt-4'>
