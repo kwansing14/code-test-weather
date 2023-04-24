@@ -1,74 +1,116 @@
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { Noto_Sans } from 'next/font/google';
-import { MdSearch } from 'react-icons/md';
 import { useMutation } from 'react-query';
+import Cloud from '@/components/Cloud';
+import Records from '@/components/Records';
+import SearchBar from '@/components/SearchBar';
+import Body from '@/components/Body';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
-const notoSans = Noto_Sans({ weight: '400', subsets: ['latin'] });
+const notoSans = Noto_Sans({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+});
+
+export interface WeatherDataProp {
+  coord: {
+    lon: number;
+    lat: number;
+  };
+  weather: {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }[];
+  base: string;
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+
+    pressure: number;
+    humidity: number;
+    sea_level: number;
+    grnd_level: number;
+  };
+  visibility: number;
+  wind: {
+    speed: number;
+    deg: number;
+    gust: number;
+  };
+  clouds: {
+    all: number;
+  };
+  dt: number;
+  sys: {
+    type: number;
+    id: number;
+    country: string;
+    sunrise: number;
+    sunset: number;
+  };
+  timezone: number;
+  id: number;
+  name: string;
+  cod: number;
+}
 
 export default function Home() {
-  const [country, setCountry] = useState('');
+  const [weatherData, setWeatherData] = useState<WeatherDataProp>();
+  const [records, setRecords] = useState<WeatherDataProp[]>([]);
 
+  const [animationParent] = useAutoAnimate();
+  // api mutation
   const mutation = useMutation({
-    mutationFn: (country: string) => {
-      return fetch(`/api/getWeather/${country}`);
+    mutationFn: (country: string) => fetch(`/api/getWeather/${country}`),
+    onSuccess: async (data) => {
+      const res = await data.json();
+      setWeatherData(res);
+      setRecords((prev) => [...prev, res]);
     },
   });
 
-  const searchHandler = () => {
-    mutation.mutate(country);
-  };
+  //localstorage storing
+  useEffect(() => {
+    if (records.length > 0) {
+      localStorage.setItem('weatherData', JSON.stringify(records));
+    }
+  }, [records]);
 
-  const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCountry(e.target.value);
-  };
+  useEffect(() => {
+    const data = localStorage.getItem('weatherData');
+    if (!data) return;
+    const res = JSON.parse(data) as WeatherDataProp[];
+    setWeatherData(res[0]);
+    setRecords(res);
+  }, []);
 
   return (
     <main className='min-h-screen bg-[url("/assets/bg-light.png")] text-black'>
-      <div className={'mx-auto max-w-[700px]' + ` ${notoSans.className}`}>
+      <div
+        className={
+          'px-[15px] mx-auto w-full md:max-w-[700px]' + ` ${notoSans.className}`
+        }
+      >
         <div className='flex flex-col'>
-          <div className='flex h-[60px] gap-[20px] mt-[26px] relative'>
-            <input
-              className='w-[620px] rounded-[20px] bg-[rgba(255,255,255,0.2)] outline-none px-[22px]'
-              onChange={inputHandler}
-            />
-            <span className='absolute top-[3px] left-[22px] opacity-40 text-[10px] leading-[13.62px]'>
-              Country
-            </span>
-            <button
-              className='h-[60px] w-[60px] rounded-[20px] bg-[#6C40B5] flex justify-center items-center text-white'
-              onClick={searchHandler}
+          <SearchBar mutation={mutation} />
+          <div className='mt-[112px] mb-[80px] bg-[rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.5)] rounded-[40px] relative'>
+            <div
+              className='flex flex-col px-[20px] md:px-[50px] py-[20px] md:py-[46px]'
+              ref={animationParent}
             >
-              <MdSearch size={34} />
-            </button>
-          </div>
-          <div className='mt-[112px] bg-[(rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.5)] rounded-[40px]'>
-            <div className='flex flex-col px-[50px] py-[46px]'>
-              <div className='text-[16px] leading-[21.79px]'>
-                {"Today's Weather"}
-              </div>
-              <div className='mt-[18px]'>
-                <Image
-                  src='/assets/26.svg'
-                  width={164}
-                  height={81}
-                  alt='temperature'
-                />
-              </div>
-              <div>29 hz</div>
-              <div>
-                <div>Johor, MY</div>
-                <div>01-09-2022 09:41am</div>
-                <div>Humidity: 58%</div>
-                <div>Clouds</div>
-              </div>
-              <div className='w-[620px] rounded-[24px] bg-[rgba(255,255,255,0.2)] px-[26px] py-[23px] mt-[26px]'>
-                <div>Search History</div>
-                <div className='flex flex-col'>
-                  <div>ok</div>
-                </div>
-              </div>
+              {weatherData && <Body weatherData={weatherData} />}
+              <Records
+                weatherData={weatherData}
+                records={records}
+                setWeatherData={setWeatherData}
+                setRecords={setRecords}
+              />
             </div>
+            <Cloud />
           </div>
         </div>
       </div>
